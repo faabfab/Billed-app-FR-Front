@@ -4,6 +4,13 @@ import LoadingPage from "./LoadingPage.js"
 
 import Actions from './Actions.js'
 
+// =============================================================================
+// import fixture
+// =============================================================================
+import { bills } from "../fixtures/bills.js";
+
+const billsSample = bills
+
 const row = (bill) => {
   return (`
     <tr>
@@ -17,14 +24,19 @@ const row = (bill) => {
       </td>
     </tr>
     `)
-  }
+}
 
 const rows = (data) => {
+
+  // FIXED: Bug report 1 : Ranger les bills par ordre de date croissante
+  data.sort((a, b) => (new Date(a.date) < new Date(b.date) ? 1 : -1))
+
   return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
 }
 
 export default ({ data: bills, loading, error }) => {
-  
+
+
   const modal = () => (`
     <div class="modal fade" id="modaleFile" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -47,7 +59,7 @@ export default ({ data: bills, loading, error }) => {
   } else if (error) {
     return ErrorPage(error)
   }
-  
+
   return (`
     <div class='layout'>
       ${VerticalLayout(120)}
