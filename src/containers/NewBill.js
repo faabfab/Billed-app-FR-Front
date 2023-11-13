@@ -22,32 +22,34 @@ export default class NewBill {
     const fileName = filePath[filePath.length - 1]
     // BUG: Faire le test des jpg ici
     // ________________________________________________________________
-    if ((fileName.split('.').pop() === 'jpg')
-      || (fileName.split('.').pop() === 'jpeg')
-      || (fileName.split('.').pop() === 'png')) {
-      console.log(fileName)
-      const formData = new FormData()
-      const email = JSON.parse(localStorage.getItem("user")).email
-      formData.append('file', file)
-      formData.append('email', email)
-
-      this.store
-        .bills()
-        .create({
-          data: formData,
-          headers: {
-            noContentType: true
-          }
-        })
-        .then(({ fileUrl, key }) => {
-          console.log(fileUrl)
-          this.billId = key
-          this.fileUrl = fileUrl
-          this.fileName = fileName
-        }).catch(error => console.error(error))
-    } else {
+    const formats = ['jpeg', 'jpg', 'png']
+    const formatError = document.querySelector('#format_error')
+    if (!formats.includes(fileName.split('.').pop())) {
       console.log('Pas jpg')
+      formatError.removeAttribute('class')
+      return
     }
+    console.log(fileName)
+    const formData = new FormData()
+    const email = JSON.parse(localStorage.getItem("user")).email
+    formData.append('file', file)
+    formData.append('email', email)
+
+    this.store
+      .bills()
+      .create({
+        data: formData,
+        headers: {
+          noContentType: true
+        }
+      })
+      .then(({ fileUrl, key }) => {
+        console.log(fileUrl)
+        this.billId = key
+        this.fileUrl = fileUrl
+        this.fileName = fileName
+      }).catch(error => console.error(error))
+    formatError.setAttribute('class', 'format_error_hide')
     // ________________________________________________________________
   }
 
