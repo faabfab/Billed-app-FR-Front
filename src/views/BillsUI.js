@@ -27,11 +27,8 @@ const row = (bill) => {
 }
 
 const rows = (data) => {
-
   // FIXED: Bug report 1 : Ranger les bills par ordre de date croissante
-  data.sort((a, b) => (new Date(a.date) < new Date(b.date) ? 1 : -1))
-
-  return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
+  return (data && data.length) ? data.sort((a, b) => (new Date(a.date) < new Date(b.date) ? 1 : -1)).map(bill => row(bill)).join("") : ""
 }
 
 export default ({ data: bills, loading, error }) => {
