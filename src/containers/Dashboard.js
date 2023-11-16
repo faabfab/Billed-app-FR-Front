@@ -32,7 +32,7 @@ export const card = (bill) => {
   const firstName = firstAndLastNames.includes('.') ?
     firstAndLastNames.split('.')[0] : ''
   const lastName = firstAndLastNames.includes('.') ?
-  firstAndLastNames.split('.')[1] : firstAndLastNames
+    firstAndLastNames.split('.')[1] : firstAndLastNames
 
   return (`
     <div class='bill-card' id='open-bill${bill.id}' data-testid='open-bill${bill.id}'>
@@ -86,28 +86,42 @@ export default class {
   }
 
   handleEditTicket(e, bill, bills) {
-    if (this.counter === undefined || this.id !== bill.id) this.counter = 0
-    if (this.id === undefined || this.id !== bill.id) this.id = bill.id
-    if (this.counter % 2 === 0) {
+    // =========================================================================
+    // TODO:  [Bug Hunt] - Dashboard
+    if (this.counter === undefined || this.id !== bill.id) {
+      // console.log('INIT 1', this.counter)
+      this.counter = 0
+      // console.log('INIT 2', this.counter)
+    }
+    if (this.id === undefined || this.id !== bill.id) {
+      // console.log('Bill ID 1', this.id)
+      this.id = bill.id
+      // console.log('Bill ID 2', this.id)
+    }
+    // console.log('Avant', this.counter, this.id)
+    if (this.counter % 2 === 0) { // Initial this.conter est pair
+
       bills.forEach(b => {
         $(`#open-bill${b.id}`).css({ background: '#0D5AE5' })
       })
       $(`#open-bill${bill.id}`).css({ background: '#2A2B35' })
       $('.dashboard-right-container div').html(DashboardFormUI(bill))
       $('.vertical-navbar').css({ height: '150vh' })
-      this.counter ++
-    } else {
+      this.counter++
+    } else { //this.conter est impair
       $(`#open-bill${bill.id}`).css({ background: '#0D5AE5' })
 
       $('.dashboard-right-container div').html(`
-        <div id="big-billed-icon" data-testid="big-billed-icon"> ${BigBilledIcon} </div>
+      <div id="big-billed-icon" data-testid="big-billed-icon"> ${BigBilledIcon} </div>
       `)
       $('.vertical-navbar').css({ height: '120vh' })
-      this.counter ++
+      this.counter++
     }
+    // console.log('Après', this.counter, this.id)
     $('#icon-eye-d').click(this.handleClickIconEye)
     $('#btn-accept-bill').click((e) => this.handleAcceptSubmit(e, bill))
     $('#btn-refuse-bill').click((e) => this.handleRefuseSubmit(e, bill))
+    // =========================================================================
   }
 
   handleAcceptSubmit = (e, bill) => {
@@ -134,20 +148,26 @@ export default class {
     if (this.counter === undefined || this.index !== index) this.counter = 0
     if (this.index === undefined || this.index !== index) this.index = index
     if (this.counter % 2 === 0) {
-      $(`#arrow-icon${this.index}`).css({ transform: 'rotate(0deg)'})
+      $(`#arrow-icon${this.index}`).css({ transform: 'rotate(0deg)' })
       $(`#status-bills-container${this.index}`)
         .html(cards(filteredBills(bills, getStatus(this.index))))
-      this.counter ++
+      this.counter++
     } else {
-      $(`#arrow-icon${this.index}`).css({ transform: 'rotate(90deg)'})
+      $(`#arrow-icon${this.index}`).css({ transform: 'rotate(90deg)' })
       $(`#status-bills-container${this.index}`)
         .html("")
-      this.counter ++
+      this.counter++
     }
 
+    // =========================================================================
+    // [Bug Hunt] - Dashboard EventListeners
     bills.forEach(bill => {
-      $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
+      $(`#open-bill${bill.id}`).unbind(); // FIXED
+      $(`#open-bill${bill.id}`).click((e) => {
+        this.handleEditTicket(e, bill, bills)
+      })
     })
+    // =========================================================================
 
     return bills
 
@@ -156,21 +176,21 @@ export default class {
   getBillsAllUsers = () => {
     if (this.store) {
       return this.store
-      .bills()
-      .list()
-      .then(snapshot => {
-        const bills = snapshot
-        .map(doc => ({
-          id: doc.id,
-          ...doc,
-          date: doc.date,
-          status: doc.status
-        }))
-        return bills
-      })
-      .catch(error => {
-        throw error;
-      })
+        .bills()
+        .list()
+        .then(snapshot => {
+          const bills = snapshot
+            .map(doc => ({
+              id: doc.id,
+              ...doc,
+              date: doc.date,
+              status: doc.status
+            }))
+          return bills
+        })
+        .catch(error => {
+          throw error;
+        })
     }
   }
 
@@ -178,11 +198,11 @@ export default class {
   /* istanbul ignore next */
   updateBill = (bill) => {
     if (this.store) {
-    return this.store
-      .bills()
-      .update({data: JSON.stringify(bill), selector: bill.id})
-      .then(bill => bill)
-      .catch(console.log)
+      return this.store
+        .bills()
+        .update({ data: JSON.stringify(bill), selector: bill.id })
+        .then(bill => bill)
+        .catch(console.log)
     }
   }
 }
