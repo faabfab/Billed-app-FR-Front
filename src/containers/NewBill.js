@@ -27,7 +27,7 @@ export default class NewBill {
     if (!formats.includes(fileName.split('.').pop())) {
       console.log('Pas jpg')
       formatError.removeAttribute('class')
-      return
+      return false
     }
     console.log(fileName)
     const formData = new FormData()
