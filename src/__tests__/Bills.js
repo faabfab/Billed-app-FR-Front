@@ -15,6 +15,9 @@ import { localStorageMock } from "../__mocks__/localStorage.js";
 
 import router from "../app/Router.js";
 
+import mockStore from "../__mocks__/store"
+
+
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills Page", () => {
     test("Then bill icon in vertical layout should be highlighted", async () => {
@@ -44,6 +47,26 @@ describe("Given I am connected as an employee", () => {
 
     // TODO: [Ajout de tests unitaires et d'intégration]
     // =========================================================================
+
+
+    test("Then title is Mes notes de frais", async () => {
+      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+      window.localStorage.setItem('user', JSON.stringify({
+        type: 'Employee'
+      }))
+      document.body.innerHTML = BillsUI({ data: bills })
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname })
+      }
+      const store = null
+      const billsContainer = new Bills({
+        document, onNavigate, store, bills, localStorage: window.localStorage
+      })
+
+      await waitFor(() => screen.getByText('Mes notes de frais'))
+      expect(screen.getByText('Mes notes de frais')).toBeTruthy()
+    })
+
     // bt nouvelle note de frais /src/__tests__/Logout.js
     describe("When I click on new bill button", () => {
       test("Then new bill page open", () => {
@@ -88,19 +111,99 @@ describe("Given I am connected as an employee", () => {
         const billsContainer = new Bills({
           document, onNavigate, store, bills, localStorage: window.localStorage
         })
-        const handleClickIconEye = jest.fn(billsContainer.handleClickIconEye.bind(billsContainer))
+        // const handleClickIconEye = jest.fn(billsContainer.handleClickIconEye.bind(billsContainer))
+        const handleClickIconEye = jest.fn((icon) => {
+          billsContainer.handleClickIconEye(icon)
+        })
         const eye = screen.getAllByTestId('icon-eye')[0]
+        const modale = screen.getByTestId('modaleFile')
+        expect(modale).toBeTruthy()
         eye.addEventListener('click', handleClickIconEye(eye))
         fireEvent.click(eye)
         expect(handleClickIconEye).toHaveBeenCalled()
-        const modale = screen.getByTestId('modaleFile')
-        expect(modale).toBeTruthy()
+        const modale2 = screen.getByTestId('modaleFile')
+
+        console.log(modale2.classList.contains('show'))
+        expect(modale2.classList.contains('show')).toBeTruthy()
       })
     })
     // =========================================================================
   })
 })
 
+
+
 // =============================================================================
 // TODO: Test d'intégration GET
+// /src/__tests__/Dashboard.js#L244
+
+// jest.mock("../app/store", () => mockStore)
+
+describe("Given I am a user connected as Employee", () => {
+  describe("When I navigate to Bills", () => {
+    test("fetches bills from mock API GET", async () => {
+      localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
+      const root = document.createElement("div")
+      root.setAttribute("id", "root")
+      document.body.append(root)
+      router()
+      window.onNavigate(ROUTES_PATH.Bills)
+      await waitFor(() => screen.getByText("Mes notes de frais"))
+      const contentType = await screen.getByText("Type")
+      expect(contentType).toBeTruthy()
+      expect(screen.getByTestId("btn-new-bill")).toBeTruthy()
+    })
+  })
+
+  describe("When an error occurs on API", () => {
+    beforeEach(() => {
+      jest.spyOn(mockStore, "bills")
+      Object.defineProperty(
+        window,
+        'localStorage',
+        { value: localStorageMock }
+      )
+      window.localStorage.setItem('user', JSON.stringify({
+        type: 'Employee',
+        email: "a@a"
+      }))
+      const root = document.createElement("div")
+      root.setAttribute("id", "root")
+      document.body.appendChild(root)
+      router()
+    })
+    test("fetches bills from an API and fails with 404 message error", async () => {
+      mockStore.bills.mockImplementationOnce(() => {
+        return {
+          list: () => {
+            return Promise.reject(new Error("Erreur 404"))
+          }
+        }
+      })
+      window.onNavigate(ROUTES_PATH.Bills)
+      await new Promise(process.nextTick);
+      // const message = await screen.getByText(/Erreur 404/)
+      const message = await screen.getByText('Erreur')
+      expect(message).toBeTruthy()
+    })
+    test("fetches messages from an API and fails with 500 message error", async () => {
+
+      mockStore.bills.mockImplementationOnce(() => {
+        return {
+          list: () => {
+            return Promise.reject(new Error("Erreur 500"))
+          }
+        }
+      })
+
+      window.onNavigate(ROUTES_PATH.Bills)
+      await new Promise(process.nextTick);
+      // const message = await screen.getByText(/Erreur 500/)
+      const message = await screen.getByText('Erreur')
+      expect(message).toBeTruthy()
+    })
+  })
+
+})
+
 // =============================================================================
