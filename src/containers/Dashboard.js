@@ -160,7 +160,7 @@ export default class {
     }
 
     // =========================================================================
-    // [Bug Hunt] - Dashboard EventListeners
+    // TODO: [Bug Hunt] - Dashboard EventListeners
     bills.forEach(bill => {
       $(`#open-bill${bill.id}`).unbind(); // FIXED
       $(`#open-bill${bill.id}`).click((e) => {

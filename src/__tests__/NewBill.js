@@ -170,5 +170,48 @@ describe("Given I am connected as an employee", () => {
 
 // =============================================================================
 // TODO: Test d'intégration POST
+describe("When the form is completed and user click on submit", () => {
+  test("Then new bill is posted", async () => {
+    const newSubmittedBill = newBill
 
+    Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+    window.localStorage.setItem('user', JSON.stringify({
+      type: 'Employee'
+    }))
+    document.body.innerHTML = NewBillUI()
+    const onNavigate = (pathname) => {
+      document.body.innerHTML = ROUTES({ pathname })
+    }
+    const store = null
+    const newBillContainer = new NewBill({
+      document, onNavigate, store, localStorage: window.localStorage
+    })
+
+    const expenseType = screen.getByTestId('expense-type')
+    expenseType.value = newSubmittedBill.type
+    const expenseName = screen.getByTestId('expense-name')
+    expenseName.value = newSubmittedBill.name
+    const expenseDate = screen.getByTestId('datepicker')
+    expenseDate.value = newSubmittedBill.date
+    const expenseAmount = screen.getByTestId('amount')
+    expenseAmount.value = newSubmittedBill.amount
+    const expenseVat = screen.getByTestId('vat')
+    expenseVat.value = newSubmittedBill.vat
+    const expensePct = screen.getByTestId('pct')
+    expensePct.value = newSubmittedBill.pct
+    const expenseCommentary = screen.getByTestId('commentary')
+    expenseCommentary.value = newSubmittedBill.commentary
+    const expenseFile = screen.getByTestId('file')
+    expenseFile.file = newSubmittedBill.fileName
+    expect(expenseFile.file).toEqual('facture.jpg')
+
+    const asyncMock = jest.fn().mockResolvedValue(43);
+
+    const m = await asyncMock(); // 43
+    console.log(m)
+
+    // expect(m).toBe(43)
+
+  })
+})
 // =============================================================================

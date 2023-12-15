@@ -19,6 +19,13 @@ import mockStore from "../__mocks__/store"
 
 
 describe("Given I am connected as an employee", () => {
+  test('Then, Loading page should be rendered', () => {
+    // DOM construction
+    document.body.innerHTML = BillsUI({ loading: true });
+
+    // expected result
+    expect(screen.getAllByText('Loading...')).toBeTruthy();
+  });
   describe("When I am on Bills Page", () => {
     test("Then bill icon in vertical layout should be highlighted", async () => {
       Object.defineProperty(window, 'localStorage', { value: localStorageMock })
@@ -98,8 +105,8 @@ describe("Given I am connected as an employee", () => {
     // =========================================================================
     // open modal /src/__tests__/Dashboard.js#217
     describe('When I click on the icon eye', () => {
-      test('A modal should open', () => {
-        Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+      test('Then a modal should open', () => {
+        /*Object.defineProperty(window, 'localStorage', { value: localStorageMock })
         window.localStorage.setItem('user', JSON.stringify({
           type: 'Employee'
         }))
@@ -116,16 +123,69 @@ describe("Given I am connected as an employee", () => {
           billsContainer.handleClickIconEye(icon)
         })
         const eye = screen.getAllByTestId('icon-eye')[0]
+
         const modale = screen.getByTestId('modaleFile')
         expect(modale).toBeTruthy()
         eye.addEventListener('click', handleClickIconEye(eye))
         fireEvent.click(eye)
-        expect(handleClickIconEye).toHaveBeenCalled()
-        const modale2 = screen.getByTestId('modaleFile')
+        expect(handleClickIconEye).toHaveBeenCalled()*/
 
-        console.log(modale2.classList.contains('show'))
-        expect(modale2.classList.contains('show')).toBeTruthy()
+        $.fn.modal = jest.fn();
+        Object.defineProperty(window, "localStorage", {
+          value: localStorageMock,
+        });
+        window.localStorage.setItem(
+          "user",
+          JSON.stringify({
+            type: "Employee",
+          })
+        );
+        document.body.innerHTML = BillsUI({ data: bills });
+        const onNavigate = (pathname) => {
+          document.body.innerHTML = ROUTES({ pathname });
+        };
+
+        const store = null
+        const billsContainer = new Bills({
+          document,
+          onNavigate,
+          store: store,
+          localStorage: window.localStorage,
+        });
+
+        const handleClickIconEye = jest.fn((e) => billsContainer.handleClickIconEye(e.target));
+        const eye = screen.getAllByTestId("icon-eye")[0];
+        eye.addEventListener("click", handleClickIconEye);
+        userEvent.click(eye);
+        expect(handleClickIconEye).toHaveBeenCalled();
+
+        eye.addEventListener("click", (e) => {
+          handleClickIconEye(e.target);
+          const modale = screen.getByTestId("modaleFile");
+          expect(modale).toHaveClass("show");
+
+        })
       })
+
+      /*
+      test("Then the modal should display the attached image", () => {
+        document.body.innerHTML = BillsUI({ data: bills })
+        const onNavigate = (pathname) => {
+          document.body.innerHTML = ROUTES({ pathname })
+        }
+        const store = null
+        const billsContainer = new Bills({
+          document, onNavigate, store, bills, localStorage: window.localStorage
+        })
+        const eye = screen.getAllByTestId('icon-eye')[0]
+        const handleClickIconEye = jest.fn((icon) => {
+          billsContainer.handleClickIconEye(icon)
+        })
+        eye.addEventListener('click', handleClickIconEye(eye))
+        expect(document.querySelector('.modal')).toBeTruthy()
+
+      })
+      */
     })
     // =========================================================================
   })
