@@ -44,6 +44,38 @@ describe("Given I am connected as an employee", () => {
       expect(windowIcon.getAttribute('class')).toEqual('active-icon')
       // =======================================================================
     })
+
+    // =========================================================================
+    // Test de return bills
+    test("Console log should have been called", () => {
+      Object.defineProperty(window, "localStorage", {
+        value: localStorageMock,
+      });
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Employee",
+        })
+      );
+      document.body.innerHTML = BillsUI({ data: bills });
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname });
+      };
+
+      const store = null
+      const billsContainer = new Bills({
+        document,
+        onNavigate,
+        store: store,
+        localStorage: window.localStorage,
+      });
+      const getBills = jest.fn(billsContainer.getBills())
+      getBills()
+      // expect(getBills).toHaveBeenCalled()
+      const logSpy = jest.spyOn(global.console, 'log')
+      expect(logSpy).toHaveBeenCalled()
+    })
+    // =========================================================================
     test("Then bills should be ordered from earliest to latest", () => {
       document.body.innerHTML = BillsUI({ data: bills })
       const dates = screen.getAllByText(/^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i).map(a => a.innerHTML)
