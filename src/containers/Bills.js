@@ -18,7 +18,6 @@ export default class {
 
   handleClickNewBill = () => {
     this.onNavigate(ROUTES_PATH['NewBill'])
-    console.log(typeof this.onNavigate(ROUTES_PATH['NewBill']))
   }
 
   handleClickIconEye = (icon) => {
@@ -55,7 +54,6 @@ export default class {
               }
             })
           console.log('length', bills.length)
-
           return bills
 
         })

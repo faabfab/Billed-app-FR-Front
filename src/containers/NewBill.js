@@ -22,29 +22,21 @@ export default class NewBill {
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length - 1]
     const formatError = document.querySelector('#format_error')
-    console.log(fileName)
-    // BUG: Faire le test des jpg ici
-    // ________________________________________________________________
+
     const formats = ["image/png", "image/jpg", "image/jpeg"]
-    console.log(file.type)
     if (!formats.includes(file.type)) {
-      console.log(fileName)
       fileInput.setAttribute('data-error', 'Le fichier n\'est pas une image ou a une extension non autorisée.')
       fileInput.setAttribute('data-error-visible', true)
-      console.log(fileInput)
       formatError.removeAttribute('class')
       return;
     }
     fileInput.setAttribute('data-error', '')
     fileInput.setAttribute('data-error-visible', false)
-    console.log(fileInput)
     const formData = new FormData()
     const email = JSON.parse(localStorage.getItem("user")).email
     formData.append('file', file)
     formData.append('email', email)
     formatError.setAttribute('class', 'format_error_hide')
-
-    console.log(formData)
 
     this.store
       .bills()
@@ -59,12 +51,10 @@ export default class NewBill {
         this.fileUrl = fileUrl
         this.fileName = fileName
       }).catch(error => console.error(error))
-    // ________________________________________________________________
   }
 
   handleSubmit = e => {
     e.preventDefault()
-    console.log('e.target.querySelector(`input[data-testid="datepicker"]`).value', e.target.querySelector(`input[data-testid="datepicker"]`).value)
     const email = JSON.parse(localStorage.getItem("user")).email
     const bill = {
       email,

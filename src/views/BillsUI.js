@@ -27,7 +27,7 @@ const row = (bill) => {
 }
 
 const rows = (data) => {
-  // FIXED: Bug report 1 : Ranger les bills par ordre de date croissante
+  // Bug-report 1 : Ranger les bills par ordre de date croissante
   return (data && data.length) ? data.sort((a, b) => (new Date(a.date) < new Date(b.date) ? 1 : -1)).map(bill => row(bill)).join("") : ""
 }
 

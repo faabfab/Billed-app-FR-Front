@@ -9,16 +9,13 @@ import NewBill from "../containers/NewBill.js"
 import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
 import router from "../app/Router.js";
 import { localStorageMock } from "../__mocks__/localStorage.js";
-import userEvent from "@testing-library/user-event";
+import store from "../__mocks__/store.js"
 
 import { newBill } from "../__mocks__/newBill"
 
-
-
 describe("Given I am connected as an employee", () => {
   describe("When I am on NewBill Page", () => {
-    // =========================================================================
-    // Mail Icon
+
     test("Then bill icon in vertical layout should be highlighted", async () => {
       Object.defineProperty(window, 'localStorage', { value: localStorageMock })
       window.localStorage.setItem('user', JSON.stringify({
@@ -33,10 +30,8 @@ describe("Given I am connected as an employee", () => {
       const mailIcon = screen.getByTestId('icon-mail')
       expect(mailIcon.getAttribute('class')).toEqual('active-icon')
     })
-    // =========================================================================
-    // =========================================================================
-    // Page title
-    test("then page title is : Envoyer une note de frais", () => {
+
+    test("Then page title is : Envoyer une note de frais", () => {
       Object.defineProperty(window, 'localStorage', { value: localStorageMock })
       window.localStorage.setItem('user', JSON.stringify({
         type: 'Employee'
@@ -46,10 +41,9 @@ describe("Given I am connected as an employee", () => {
       document.body.innerHTML = NewBillUI()
       expect(screen.getByText('Envoyer une note de frais')).toBeTruthy()
     })
-    // =========================================================================
-    // =========================================================================
-    // TODO: test file type is good
-    describe("when bill file type is", () => {
+
+
+    describe("when bill file type submitted is", () => {
       test("jpg", () => {
 
         const mockFiles = [new File(['newBill'], 'newBill.jpg', { type: 'image/jpeg' })]
@@ -63,62 +57,24 @@ describe("Given I am connected as an employee", () => {
         const onNavigate = (pathname) => {
           document.body.innerHTML = ROUTES({ pathname })
         }
-        const store = null
         const newBillContainer = new NewBill({
           document, onNavigate, store, localStorage: window.localStorage
         })
 
         const handleChangeFile = jest.fn((e) => {
-          // e.preventDefault()
           newBillContainer.handleChangeFile(e)
         })
         const file = screen.getByTestId('file')
-        // file.file = billFile
         file.addEventListener('change', handleChangeFile)
         fireEvent.change(file, { target: { files: mockFiles } })
 
         const formatError = file.getAttribute('data-error-visible')
 
-        // expect(file.file).toEqual('bill.jpg')
-        // expect(formatError.classList.contains('format_error_hide')).toBe(true)
-        // BUG: La class hidden disparait ??
-        // expect(formatError.classList.contains('format_error_hide')).toBe(true)
-
         expect(handleChangeFile).toHaveBeenCalled()
         expect(formatError).toBe('false')
 
       });
-      /*test("not jpg", () => {
-        const billFile = 'bill.png'
-        Object.defineProperty(window, 'localStorage', { value: localStorageMock })
-        window.localStorage.setItem('user', JSON.stringify({
-          type: 'Employee'
-        }))
-
-        document.body.innerHTML = NewBillUI()
-
-        const onNavigate = (pathname) => {
-          document.body.innerHTML = ROUTES({ pathname })
-        }
-        const store = null
-        const newBillContainer = new NewBill({
-          document, onNavigate, store, localStorage: window.localStorage
-        })
-
-        const handleChangeFile = jest.fn(newBillContainer.handleChangeFile.bind(newBillContainer))
-        const file = screen.getByTestId('file')
-        file.addEventListener('change', handleChangeFile)
-        file.setAttribute('value', billFile)
-        fireEvent.change(file)
-        expect(handleChangeFile).toHaveBeenCalled()
-        const formatError = screen.getByTestId('format_error')
-        expect(formatError.getAttribute('class')).toEqual(null)
-      })*/
     })
-    // =========================================================================
-    // =========================================================================
-    // TODO: Test on submit button
-    // =========================================================================
 
     describe("When user click on submit", () => {
       test("Then return on bills page", () => {
@@ -133,27 +89,23 @@ describe("Given I am connected as an employee", () => {
         const onNavigate = (pathname) => {
           document.body.innerHTML = ROUTES({ pathname })
         }
-        const store = null
         const newBillContainer = new NewBill({
           document, onNavigate, store, localStorage: window.localStorage
         })
-        const expenseType = screen.getByTestId('expense-type')
-        expenseType.value = newSubmittedBill.type
-        const expenseName = screen.getByTestId('expense-name')
-        expenseName.value = newSubmittedBill.name
-        const expenseDate = screen.getByTestId('datepicker')
-        expenseDate.value = newSubmittedBill.date
-        const expenseAmount = screen.getByTestId('amount')
-        expenseAmount.value = newSubmittedBill.amount
-        const expenseVat = screen.getByTestId('vat')
-        expenseVat.value = newSubmittedBill.vat
-        const expensePct = screen.getByTestId('pct')
-        expensePct.value = newSubmittedBill.pct
-        const expenseCommentary = screen.getByTestId('commentary')
-        expenseCommentary.value = newSubmittedBill.commentary
-        const expenseFile = screen.getByTestId('file')
-        expenseFile.file = newSubmittedBill.fileName
-        expect(expenseFile.file).toEqual('facture.jpg')
+
+        screen.getByTestId('expense-type').value = newSubmittedBill.type
+        screen.getByTestId('expense-name').value = newSubmittedBill.name
+        screen.getByTestId('datepicker').value = newSubmittedBill.date
+        screen.getByTestId('amount').value = newSubmittedBill.amount
+        screen.getByTestId('vat').value = newSubmittedBill.vat
+        screen.getByTestId('pct').value = newSubmittedBill.pct
+        screen.getByTestId('commentary').value = newSubmittedBill.commentary
+        screen.getByTestId('file').file = newSubmittedBill.fileName
+
+        newBillContainer.fileName = newSubmittedBill.fileName
+        newBillContainer.fileUrl = newSubmittedBill.fileUrl
+
+        expect(screen.getByTestId('file').file).toEqual('facture.jpg')
         const handleSubmit = jest.fn((e) => {
           e.preventDefault();
           newBillContainer.handleSubmit(e);
@@ -168,8 +120,7 @@ describe("Given I am connected as an employee", () => {
   })
 })
 
-// =============================================================================
-// TODO: Test d'intégration POST
+// Test d'intégration POST
 describe("When the form is completed and user click on submit", () => {
   test("Then new bill is posted", async () => {
     const newSubmittedBill = newBill
@@ -182,36 +133,30 @@ describe("When the form is completed and user click on submit", () => {
     const onNavigate = (pathname) => {
       document.body.innerHTML = ROUTES({ pathname })
     }
-    const store = null
     const newBillContainer = new NewBill({
       document, onNavigate, store, localStorage: window.localStorage
     })
 
-    const expenseType = screen.getByTestId('expense-type')
-    expenseType.value = newSubmittedBill.type
-    const expenseName = screen.getByTestId('expense-name')
-    expenseName.value = newSubmittedBill.name
-    const expenseDate = screen.getByTestId('datepicker')
-    expenseDate.value = newSubmittedBill.date
-    const expenseAmount = screen.getByTestId('amount')
-    expenseAmount.value = newSubmittedBill.amount
-    const expenseVat = screen.getByTestId('vat')
-    expenseVat.value = newSubmittedBill.vat
-    const expensePct = screen.getByTestId('pct')
-    expensePct.value = newSubmittedBill.pct
-    const expenseCommentary = screen.getByTestId('commentary')
-    expenseCommentary.value = newSubmittedBill.commentary
-    const expenseFile = screen.getByTestId('file')
-    expenseFile.file = newSubmittedBill.fileName
-    expect(expenseFile.file).toEqual('facture.jpg')
+    screen.getByTestId('expense-type').value = newSubmittedBill.type
+    screen.getByTestId('expense-name').value = newSubmittedBill.name
+    screen.getByTestId('datepicker').value = newSubmittedBill.date
+    screen.getByTestId('amount').value = newSubmittedBill.amount
+    screen.getByTestId('vat').value = newSubmittedBill.vat
+    screen.getByTestId('pct').value = newSubmittedBill.pct
+    screen.getByTestId('commentary').value = newSubmittedBill.commentary
 
-    const asyncMock = jest.fn().mockResolvedValue(43);
+    newBillContainer.fileName = newSubmittedBill.fileName
+    newBillContainer.fileUrl = newSubmittedBill.fileUrl
 
-    const m = await asyncMock(); // 43
-    console.log(m)
+    newBillContainer.updateBill = jest.fn()
+    const handleSubmit = jest.fn((e) => newBillContainer.handleSubmit(e));
 
-    // expect(m).toBe(43)
+    const formBill = screen.getByTestId("form-new-bill");
+    formBill.addEventListener("submit", handleSubmit);
+    fireEvent.submit(formBill);
+
+    expect(handleSubmit).toHaveBeenCalled();
+    expect(newBillContainer.updateBill).toHaveBeenCalled()
 
   })
 })
-// =============================================================================

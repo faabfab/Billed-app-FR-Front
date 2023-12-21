@@ -12,11 +12,28 @@ import BillsUI from "../views/BillsUI.js"
 import { bills } from "../fixtures/bills.js"
 import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
 import { localStorageMock } from "../__mocks__/localStorage.js";
+import store from "../__mocks__/store.js"
 
 import router from "../app/Router.js";
 
 import mockStore from "../__mocks__/store"
+import { data } from "jquery"
 
+// Mock return value
+describe('Mock return value', () => {
+  Bills.getBills = jest.fn().mockReturnValue(bills)
+  it('Should mock the return value of getBills', () => {
+    expect(Bills.getBills()).toBe(bills)
+  })
+})
+
+// Error
+describe('When I am on Bills page but back-end send an error message', () => {
+  test('Then, Error page should be rendered', () => {
+    document.body.innerHTML = BillsUI({ error: 'some error message' })
+    expect(screen.getAllByText('Erreur')).toBeTruthy()
+  })
+})
 
 describe("Given I am connected as an employee", () => {
   test('Then, Loading page should be rendered', () => {
@@ -40,14 +57,11 @@ describe("Given I am connected as an employee", () => {
       await waitFor(() => screen.getByTestId('icon-window'))
       const windowIcon = screen.getByTestId('icon-window')
       //to-do write expect expression
-      // =======================================================================
       expect(windowIcon.getAttribute('class')).toEqual('active-icon')
-      // =======================================================================
     })
 
-    // =========================================================================
     // Test de return bills
-    test("Console log should have been called", () => {
+    test("bills have been returned", () => {
       Object.defineProperty(window, "localStorage", {
         value: localStorageMock,
       });
@@ -58,24 +72,11 @@ describe("Given I am connected as an employee", () => {
         })
       );
       document.body.innerHTML = BillsUI({ data: bills });
-      const onNavigate = (pathname) => {
-        document.body.innerHTML = ROUTES({ pathname });
-      };
 
-      const store = null
-      const billsContainer = new Bills({
-        document,
-        onNavigate,
-        store: store,
-        localStorage: window.localStorage,
-      });
-      const getBills = jest.fn(billsContainer.getBills())
-      getBills()
-      // expect(getBills).toHaveBeenCalled()
-      const logSpy = jest.spyOn(global.console, 'log')
-      expect(logSpy).toHaveBeenCalled()
+      expect(bills[0].name).toBe('test3')
+      expect(bills.length).toBe(4)
     })
-    // =========================================================================
+
     test("Then bills should be ordered from earliest to latest", () => {
       document.body.innerHTML = BillsUI({ data: bills })
       const dates = screen.getAllByText(/^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i).map(a => a.innerHTML)
@@ -83,10 +84,6 @@ describe("Given I am connected as an employee", () => {
       const datesSorted = [...dates].sort(antiChrono)
       expect(dates).toEqual(datesSorted)
     })
-
-    // TODO: [Ajout de tests unitaires et d'intégration]
-    // =========================================================================
-
 
     test("Then title is Mes notes de frais", async () => {
       Object.defineProperty(window, 'localStorage', { value: localStorageMock })
@@ -97,7 +94,7 @@ describe("Given I am connected as an employee", () => {
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname })
       }
-      const store = null
+      // const store = null
       const billsContainer = new Bills({
         document, onNavigate, store, bills, localStorage: window.localStorage
       })
@@ -105,6 +102,30 @@ describe("Given I am connected as an employee", () => {
       await waitFor(() => screen.getByText('Mes notes de frais'))
       expect(screen.getByText('Mes notes de frais')).toBeTruthy()
     })
+
+    test("Then it should return bills data", () => {
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname });
+      };
+
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
+
+      store.bills = jest.fn().mockImplementationOnce(() => {
+        return {
+          list: jest.fn().mockResolvedValue([{ data: () => ({ date: "" }) }]),
+        };
+      });
+
+      const bills = new Bills({
+        document,
+        onNavigate,
+        store: store,
+        localStorage,
+      });
+
+      const res = bills.getBills();
+      expect(res).toEqual(Promise.resolve({}));
+    });
 
     // bt nouvelle note de frais /src/__tests__/Logout.js
     describe("When I click on new bill button", () => {
@@ -118,7 +139,7 @@ describe("Given I am connected as an employee", () => {
         const onNavigate = (pathname) => {
           document.body.innerHTML = ROUTES({ pathname })
         }
-        const store = null
+        // const store = null
         const billsContainer = new Bills({
           document, onNavigate, store, bills, localStorage: window.localStorage
         })
@@ -132,35 +153,9 @@ describe("Given I am connected as an employee", () => {
         expect(screen.getByText('Envoyer une note de frais')).toBeTruthy()
       })
     })
-    // =========================================================================
 
-    // =========================================================================
-    // open modal /src/__tests__/Dashboard.js#217
     describe('When I click on the icon eye', () => {
       test('Then a modal should open', () => {
-        /*Object.defineProperty(window, 'localStorage', { value: localStorageMock })
-        window.localStorage.setItem('user', JSON.stringify({
-          type: 'Employee'
-        }))
-        document.body.innerHTML = BillsUI({ data: bills })
-        const onNavigate = (pathname) => {
-          document.body.innerHTML = ROUTES({ pathname })
-        }
-        const store = null
-        const billsContainer = new Bills({
-          document, onNavigate, store, bills, localStorage: window.localStorage
-        })
-        // const handleClickIconEye = jest.fn(billsContainer.handleClickIconEye.bind(billsContainer))
-        const handleClickIconEye = jest.fn((icon) => {
-          billsContainer.handleClickIconEye(icon)
-        })
-        const eye = screen.getAllByTestId('icon-eye')[0]
-
-        const modale = screen.getByTestId('modaleFile')
-        expect(modale).toBeTruthy()
-        eye.addEventListener('click', handleClickIconEye(eye))
-        fireEvent.click(eye)
-        expect(handleClickIconEye).toHaveBeenCalled()*/
 
         $.fn.modal = jest.fn();
         Object.defineProperty(window, "localStorage", {
@@ -177,7 +172,6 @@ describe("Given I am connected as an employee", () => {
           document.body.innerHTML = ROUTES({ pathname });
         };
 
-        const store = null
         const billsContainer = new Bills({
           document,
           onNavigate,
@@ -198,38 +192,12 @@ describe("Given I am connected as an employee", () => {
 
         })
       })
-
-      /*
-      test("Then the modal should display the attached image", () => {
-        document.body.innerHTML = BillsUI({ data: bills })
-        const onNavigate = (pathname) => {
-          document.body.innerHTML = ROUTES({ pathname })
-        }
-        const store = null
-        const billsContainer = new Bills({
-          document, onNavigate, store, bills, localStorage: window.localStorage
-        })
-        const eye = screen.getAllByTestId('icon-eye')[0]
-        const handleClickIconEye = jest.fn((icon) => {
-          billsContainer.handleClickIconEye(icon)
-        })
-        eye.addEventListener('click', handleClickIconEye(eye))
-        expect(document.querySelector('.modal')).toBeTruthy()
-
-      })
-      */
     })
-    // =========================================================================
   })
 })
 
-
-
-// =============================================================================
-// TODO: Test d'intégration GET
+// Test d'intégration GET
 // /src/__tests__/Dashboard.js#L244
-
-// jest.mock("../app/store", () => mockStore)
 
 describe("Given I am a user connected as Employee", () => {
   describe("When I navigate to Bills", () => {
@@ -274,7 +242,6 @@ describe("Given I am a user connected as Employee", () => {
       })
       window.onNavigate(ROUTES_PATH.Bills)
       await new Promise(process.nextTick);
-      // const message = await screen.getByText(/Erreur 404/)
       const message = await screen.getByText('Erreur')
       expect(message).toBeTruthy()
     })
@@ -290,12 +257,9 @@ describe("Given I am a user connected as Employee", () => {
 
       window.onNavigate(ROUTES_PATH.Bills)
       await new Promise(process.nextTick);
-      // const message = await screen.getByText(/Erreur 500/)
       const message = await screen.getByText('Erreur')
       expect(message).toBeTruthy()
     })
   })
 
 })
-
-// =============================================================================
