@@ -43,8 +43,8 @@ describe("Given I am connected as an employee", () => {
     })
 
 
-    describe("when bill file type submitted is", () => {
-      test("jpg", () => {
+    describe("when bill file submitted", () => {
+      test("Then the type is jpg", () => {
 
         const mockFiles = [new File(['newBill'], 'newBill.jpg', { type: 'image/jpeg' })]
         expect(mockFiles[0].type).toEqual('image/jpeg')
