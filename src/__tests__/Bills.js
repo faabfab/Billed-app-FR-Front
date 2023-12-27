@@ -94,7 +94,6 @@ describe("Given I am connected as an employee", () => {
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname })
       }
-      // const store = null
       const billsContainer = new Bills({
         document, onNavigate, store, bills, localStorage: window.localStorage
       })
