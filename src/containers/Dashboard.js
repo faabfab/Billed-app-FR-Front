@@ -87,7 +87,7 @@ export default class {
 
   handleEditTicket(e, bill, bills) {
     // =========================================================================
-    // TODO:  [Bug Hunt] - Dashboard
+    // [Bug Hunt] - Dashboard
     if (this.counter === undefined || this.id !== bill.id) {
       // console.log('INIT 1', this.counter)
       this.counter = 0
@@ -160,7 +160,7 @@ export default class {
     }
 
     // =========================================================================
-    // TODO: [Bug Hunt] - Dashboard EventListeners
+    // [Bug Hunt] - Dashboard EventListeners
     bills.forEach(bill => {
       $(`#open-bill${bill.id}`).unbind(); // FIXED
       $(`#open-bill${bill.id}`).click((e) => {

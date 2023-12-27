@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "test": "jest --coverage --noStackTrace --silent=true"
+    "test": "jest --coverage --noStackTrace --silent=true",
+    "views-test": "jest  --coverage --noStackTrace --silent=true --findRelatedTests src/views/BillsUI.js",
+    "jest-test": "jest --silent=true"
   },
   "jest": {
     "verbose": false,
